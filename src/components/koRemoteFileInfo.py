@@ -52,6 +52,8 @@ class koRemoteFileInfo:
     _possible_first_chars_for_unix_listing = ("-", "d", "l", "s", "b", "c")
     _3char_month_names = ["jan","feb","mar","apr","may","jun",
                           "jul","aug","sep","oct","nov","dec"]
+    _french_month_names = ["janv.","fevr.","mars","avril","mai","juin",
+                           "juil.","aout","sept.","oct.","nov.","dec."]
     # Encoding is used when encoding is not UTF8 compatible
     encoding = ''
     link_target = None
@@ -272,7 +274,7 @@ class koRemoteFileInfo:
                 # to see if we have a time, or a year?
                 guessedYear = False
                 if fi[5] and (fi[5][0] not in string_digits or
-                              (len(fi[6]) == 3 and fi[6][0] not in string_digits)):
+                              (len(fi[6]) >= 3 and fi[6][0] not in string_digits)):
                     if " " in fi[7] and fi[7][0] in string_digits:
                         # Requires the filename field to be split up:
                         fi = fi[:1] + fi[2:7] + fi[7].split(None, 1)
@@ -296,6 +298,12 @@ class koRemoteFileInfo:
 
                     if len(day) < 2: day = "0"+day
                     if len(hour) < 5: hour = "0"+hour
+                    # Bug fix Issue 20
+                    if month in self._french_month_names: month = self._3char_month_names[self._french_month_names.index(month)]
+                    # Workaround to deal with french accents
+                    if month[0] == 'a' and month[1] == 'o': month = self._3char_month_names[7]
+                    if month[0] == 'f': month = self._3char_month_names[1]
+                    if month[0] == 'd': month = self._3char_month_names[11]
                     date = "%s %s %s %s" % (month, day, year, hour)
                     try:
                         # Note: This can fail due to locale differences between
